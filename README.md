@@ -123,6 +123,11 @@ style X fill:gray,color:#fff
 </html>
 ```
 
+Dưới đây là **mã SQL** tạo bảng cho hệ thống **bán hàng hoa quả online**, sử dụng **MySQL** hoặc các hệ quản trị quan hệ khác (như PostgreSQL, SQL Server có thể dùng tương tự):
+
+---
+
+### ✅ **1. Bảng `users`**
 
 ```sql
 CREATE TABLE users (
@@ -135,5 +140,144 @@ CREATE TABLE users (
     role ENUM('user', 'admin') DEFAULT 'user',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+```
 
+---
+
+### ✅ **2. Bảng `categories`**
+
+```sql
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+### ✅ **3. Bảng `products`**
+
+```sql
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    category_id INT,
+    price DECIMAL(10,2) NOT NULL,
+    image_url VARCHAR(255),
+    stock INT DEFAULT 0,
+    origin VARCHAR(100),
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+```
+
+---
+
+### ✅ **4. Bảng `carts`**
+
+```sql
+CREATE TABLE carts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+---
+
+### ✅ **5. Bảng `cart_items`**
+
+```sql
+CREATE TABLE cart_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cart_id INT,
+    product_id INT,
+    quantity INT DEFAULT 1,
+    FOREIGN KEY (cart_id) REFERENCES carts(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+```
+
+---
+
+### ✅ **6. Bảng `orders`**
+
+```sql
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    total_amount DECIMAL(10,2),
+    status ENUM('pending', 'shipped', 'delivered', 'canceled') DEFAULT 'pending',
+    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    delivery_date DATETIME,
+    shipping_address TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+---
+
+### ✅ **7. Bảng `order_items`**
+
+```sql
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    price DECIMAL(10,2),
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+```
+
+---
+
+### ✅ **8. Bảng `reviews`**
+
+```sql
+CREATE TABLE reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    product_id INT,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+```
+
+---
+
+### ✅ **9. Bảng `payments`** *(tuỳ chọn nếu tích hợp thanh toán)*
+
+```sql
+CREATE TABLE payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    payment_method VARCHAR(50), -- VNPay, Momo, COD
+    payment_status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    transaction_id VARCHAR(100),
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+```
+
+---
+
+### ✅ **10. Bảng `feedbacks`**
+
+```sql
+CREATE TABLE feedbacks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    message TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 ```
